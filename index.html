@@ -20,44 +20,115 @@
     </div>
     <div id="viewer">
       <div id="controls">
-        <button onclick="rotateLeft()">⟵</button>
-        <button onclick="rotateRight()">⟶</button>
+        <div class="control-group">
+          <button class="btn-up" onclick="goUp()">↑</button>
+          <button onclick="rotateLeft()">⟵</button>
+          <button class="btn-down" onclick="goDown()">↓</button>
+        </div>
+        <div class="control-group">
+          <button class="btn-up" onclick="goUp()">↑</button>
+          <button onclick="rotateRight()">⟶</button>
+          <button class="btn-down" onclick="goDown()">↓</button>
+        </div>
       </div>
-        <div id="imageContainer"></div>
+      <div id="imageContainer">
+        <div id="levelStack"></div>
+      </div>
     </div>
   </div>
   <script>
     const version = "1.0.0";
     const buildTime = "2025-08-21 12:26 CEST";
-    const imageContainer = document.getElementById("imageContainer");
+    const levelList = document.getElementById("levelList");
+    const levelStack = document.getElementById("levelStack");
     const imageWidth = 2000; // width of level images in pixels
     let rotation = 0;
+    let currentLevel = 0;
+    let levels = [];
 
     function updateView() {
+      const levelDiv = levelStack.children[currentLevel];
+      if (!levelDiv) return;
       const offset = (rotation / 360) * imageWidth;
-      imageContainer.style.backgroundPosition = `${-offset}px 0`;
+      levelDiv.style.backgroundPosition = `${-offset}px 0`;
+    }
+
+    function updateLevelPosition(duration = 0.5) {
+      levelStack.style.transitionDuration = `${duration}s`;
+      levelStack.style.transform = `translateY(-${currentLevel * 100}%)`;
+    }
+
+    function updateButtons() {
+      document.querySelectorAll('.btn-up').forEach(btn => btn.disabled = currentLevel >= levels.length - 1);
+      document.querySelectorAll('.btn-down').forEach(btn => btn.disabled = currentLevel <= 0);
+    }
+
+    function setActiveLevel() {
+      [...levelList.children].forEach(li => li.classList.remove('active'));
+      if (levelList.children[currentLevel]) {
+        levelList.children[currentLevel].classList.add('active');
+      }
+    }
+
+    function goUp() {
+      if (currentLevel < levels.length - 1) {
+        const prev = currentLevel;
+        currentLevel++;
+        rotation = 0;
+        levelStack.children[prev].style.backgroundPosition = '0 0';
+        updateView();
+        updateLevelPosition();
+        updateButtons();
+        setActiveLevel();
+      }
+    }
+
+    function goDown() {
+      if (currentLevel > 0) {
+        const prev = currentLevel;
+        currentLevel--;
+        rotation = 0;
+        levelStack.children[prev].style.backgroundPosition = '0 0';
+        updateView();
+        updateLevelPosition();
+        updateButtons();
+        setActiveLevel();
+      }
+    }
+
+    function goToLevel(index) {
+      if (index < 0 || index >= levels.length || index === currentLevel) return;
+      const prev = currentLevel;
+      currentLevel = index;
+      rotation = 0;
+      if (levelStack.children[prev]) {
+        levelStack.children[prev].style.backgroundPosition = '0 0';
+      }
+      updateView();
+      updateLevelPosition(1);
+      updateButtons();
+      setActiveLevel();
     }
 
     fetch("data/levels.json?v=" + version)
       .then(res => res.json())
       .then(data => {
-        const list = document.getElementById("levelList");
-        data.levels.forEach((level, index) => {
-          const item = document.createElement("li");
+        levels = data.levels;
+        levels.forEach((level, index) => {
+          const levelDiv = document.createElement('div');
+          levelDiv.className = 'level';
+          levelDiv.style.backgroundImage = `url(${level.image}?v=${version})`;
+          levelStack.appendChild(levelDiv);
+
+          const item = document.createElement('li');
           item.textContent = level.name;
-          item.dataset.image = level.image + "?v=" + version;
-          item.addEventListener("click", () => {
-            [...list.children].forEach(li => li.classList.remove("active"));
-            item.classList.add("active");
-            imageContainer.style.backgroundImage = `url(${item.dataset.image})`;
-            rotation = 0;
-            imageContainer.style.backgroundPosition = "0 0";
-          });
-          list.appendChild(item);
+          item.addEventListener('click', () => goToLevel(index));
+          levelList.appendChild(item);
         });
-        if (data.levels.length > 0) {
-          imageContainer.style.backgroundImage = `url(${data.levels[0].image}?v=${version})`;
-          list.children[0].classList.add("active");
+        if (levels.length > 0) {
+          updateLevelPosition(0);
+          setActiveLevel();
+          updateButtons();
         }
       });
 
@@ -74,6 +145,10 @@
         rotateLeft();
       } else if (e.key === 'ArrowRight') {
         rotateRight();
+      } else if (e.key === 'ArrowUp') {
+        goUp();
+      } else if (e.key === 'ArrowDown') {
+        goDown();
       }
     });
   </script>
