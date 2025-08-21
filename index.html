@@ -60,11 +60,11 @@
     });
 
     function rotateLeft() {
-      rotation = (rotation - 30 + 360) % 360;
+      rotation -= 30;
       updateView();
     }
     function rotateRight() {
-      rotation = (rotation + 30) % 360;
+      rotation += 30;
       updateView();
     }
     document.addEventListener('keydown', (e) => {
