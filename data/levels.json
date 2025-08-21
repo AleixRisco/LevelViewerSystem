@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "buildTime": "2025-08-21 11:00 CEST",
+  "levels": [
+    {
+      "name": "level_01",
+      "image": "assets/level_01.png"
+    }
+  ]
+}
