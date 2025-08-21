@@ -23,15 +23,20 @@
         <button onclick="rotateLeft()">⟵</button>
         <button onclick="rotateRight()">⟶</button>
       </div>
-      <div id="imageContainer">
-        <img id="levelImage" class="level-image" src="" alt="Vista del nivel" />
-      </div>
+        <div id="imageContainer"></div>
     </div>
   </div>
   <script>
     const version = "1.0.0";
     const buildTime = "2025-08-21 11:00 CEST";
+    const imageContainer = document.getElementById("imageContainer");
+    const imageWidth = 2000; // width of level images in pixels
     let rotation = 0;
+
+    function updateView() {
+      const offset = (rotation / 360) * imageWidth;
+      imageContainer.style.backgroundPosition = `${-offset}px 0`;
+    }
 
     fetch("data/levels.json?v=" + version)
       .then(res => res.json())
@@ -43,24 +48,24 @@
           option.textContent = level.name;
           selector.appendChild(option);
         });
-        if (data.levels.length > 0) {
-          document.getElementById("levelImage").src = data.levels[0].image + "?v=" + version;
-        }
-      });
+          if (data.levels.length > 0) {
+            imageContainer.style.backgroundImage = `url(${data.levels[0].image}?v=${version})`;
+          }
+        });
 
     document.getElementById("levelSelector").addEventListener("change", (e) => {
-      document.getElementById("levelImage").src = e.target.value;
+      imageContainer.style.backgroundImage = `url(${e.target.value})`;
       rotation = 0;
-      document.getElementById("levelImage").style.transform = `rotateY(0deg)`;
+      imageContainer.style.backgroundPosition = "0 0";
     });
 
     function rotateLeft() {
-      rotation -= 30;
-      document.getElementById("levelImage").style.transform = `rotateY(${rotation}deg)`;
+      rotation = (rotation - 30 + 360) % 360;
+      updateView();
     }
     function rotateRight() {
-      rotation += 30;
-      document.getElementById("levelImage").style.transform = `rotateY(${rotation}deg)`;
+      rotation = (rotation + 30) % 360;
+      updateView();
     }
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
