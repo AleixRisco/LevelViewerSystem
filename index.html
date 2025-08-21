@@ -101,6 +101,8 @@
     }
 
     function startRotate(direction) {
+      rotation += direction * ROTATE_STEP;
+      updateView();
       if (rotateInterval) return;
       rotateInterval = setInterval(() => {
         rotation += direction * ROTATE_STEP;
@@ -151,20 +153,10 @@
         }
       });
 
-    function rotateLeft() {
-      rotation -= 30;
-      updateView();
-    }
-    function rotateRight() {
-      rotation += 30;
-      updateView();
-    }
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
-        rotateLeft();
         if (!rotateInterval) startRotate(-1);
       } else if (e.key === 'ArrowRight') {
-        rotateRight();
         if (!rotateInterval) startRotate(1);
       } else if (e.key === 'ArrowUp') {
         if (!moveInterval) startVerticalMove(-1);
@@ -194,13 +186,13 @@
     });
 
     document.querySelectorAll('.btn-rotate-left').forEach(btn => {
-      btn.addEventListener('mousedown', () => { rotateLeft(); startRotate(-1); });
+      btn.addEventListener('mousedown', () => startRotate(-1));
       btn.addEventListener('mouseup', stopRotate);
       btn.addEventListener('mouseleave', stopRotate);
     });
 
     document.querySelectorAll('.btn-rotate-right').forEach(btn => {
-      btn.addEventListener('mousedown', () => { rotateRight(); startRotate(1); });
+      btn.addEventListener('mousedown', () => startRotate(1));
       btn.addEventListener('mouseup', stopRotate);
       btn.addEventListener('mouseleave', stopRotate);
     });
