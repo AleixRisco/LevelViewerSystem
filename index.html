@@ -11,11 +11,11 @@
     <div id="sidebar">
       <div>
         <h2>Niveles</h2>
-        <select id="levelSelector"></select>
+        <ul id="levelList"></ul>
       </div>
       <div class="version-box">
         Versión: 1.0.0<br>
-        Build: 2025-08-21 11:00 CEST
+        Build: 2025-08-21 12:26 CEST
       </div>
     </div>
     <div id="viewer">
@@ -28,7 +28,7 @@
   </div>
   <script>
     const version = "1.0.0";
-    const buildTime = "2025-08-21 11:00 CEST";
+    const buildTime = "2025-08-21 12:26 CEST";
     const imageContainer = document.getElementById("imageContainer");
     const imageWidth = 2000; // width of level images in pixels
     let rotation = 0;
@@ -41,23 +41,25 @@
     fetch("data/levels.json?v=" + version)
       .then(res => res.json())
       .then(data => {
-        const selector = document.getElementById("levelSelector");
-        data.levels.forEach(level => {
-          const option = document.createElement("option");
-          option.value = level.image + "?v=" + version;
-          option.textContent = level.name;
-          selector.appendChild(option);
+        const list = document.getElementById("levelList");
+        data.levels.forEach((level, index) => {
+          const item = document.createElement("li");
+          item.textContent = level.name;
+          item.dataset.image = level.image + "?v=" + version;
+          item.addEventListener("click", () => {
+            [...list.children].forEach(li => li.classList.remove("active"));
+            item.classList.add("active");
+            imageContainer.style.backgroundImage = `url(${item.dataset.image})`;
+            rotation = 0;
+            imageContainer.style.backgroundPosition = "0 0";
+          });
+          list.appendChild(item);
         });
-          if (data.levels.length > 0) {
-            imageContainer.style.backgroundImage = `url(${data.levels[0].image}?v=${version})`;
-          }
-        });
-
-    document.getElementById("levelSelector").addEventListener("change", (e) => {
-      imageContainer.style.backgroundImage = `url(${e.target.value})`;
-      rotation = 0;
-      imageContainer.style.backgroundPosition = "0 0";
-    });
+        if (data.levels.length > 0) {
+          imageContainer.style.backgroundImage = `url(${data.levels[0].image}?v=${version})`;
+          list.children[0].classList.add("active");
+        }
+      });
 
     function rotateLeft() {
       rotation -= 30;
