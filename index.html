@@ -59,8 +59,8 @@
     }
 
     function updateButtons() {
-      document.querySelectorAll('.btn-up').forEach(btn => btn.disabled = currentLevel >= levels.length - 1);
-      document.querySelectorAll('.btn-down').forEach(btn => btn.disabled = currentLevel <= 0);
+      document.querySelectorAll('.btn-up').forEach(btn => btn.disabled = currentLevel <= 0);
+      document.querySelectorAll('.btn-down').forEach(btn => btn.disabled = currentLevel >= levels.length - 1);
     }
 
     function setActiveLevel() {
@@ -71,9 +71,9 @@
     }
 
     function goUp() {
-      if (currentLevel < levels.length - 1) {
+      if (currentLevel > 0) {
         const prev = currentLevel;
-        currentLevel++;
+        currentLevel--;
         rotation = 0;
         levelStack.children[prev].style.backgroundPosition = '0 0';
         updateView();
@@ -84,9 +84,9 @@
     }
 
     function goDown() {
-      if (currentLevel > 0) {
+      if (currentLevel < levels.length - 1) {
         const prev = currentLevel;
-        currentLevel--;
+        currentLevel++;
         rotation = 0;
         levelStack.children[prev].style.backgroundPosition = '0 0';
         updateView();
@@ -118,14 +118,16 @@
           const levelDiv = document.createElement('div');
           levelDiv.className = 'level';
           levelDiv.style.backgroundImage = `url(${level.image}?v=${version})`;
-          levelStack.appendChild(levelDiv);
+          levelStack.prepend(levelDiv);
 
           const item = document.createElement('li');
           item.textContent = level.name;
-          item.addEventListener('click', () => goToLevel(index));
-          levelList.appendChild(item);
+          const domIndex = levels.length - 1 - index;
+          item.addEventListener('click', () => goToLevel(domIndex));
+          levelList.prepend(item);
         });
         if (levels.length > 0) {
+          currentLevel = levels.length - 1;
           updateLevelPosition(0);
           setActiveLevel();
           updateButtons();
