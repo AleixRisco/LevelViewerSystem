@@ -23,7 +23,9 @@
         <button onclick="rotateLeft()">⟵</button>
         <button onclick="rotateRight()">⟶</button>
       </div>
-      <img id="levelImage" class="level-image" src="" alt="Vista del nivel" />
+      <div id="imageContainer">
+        <img id="levelImage" class="level-image" src="" alt="Vista del nivel" />
+      </div>
     </div>
   </div>
   <script>
@@ -60,6 +62,13 @@
       rotation += 30;
       document.getElementById("levelImage").style.transform = `rotateY(${rotation}deg)`;
     }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        rotateLeft();
+      } else if (e.key === 'ArrowRight') {
+        rotateRight();
+      }
+    });
   </script>
 </body>
 </html>
