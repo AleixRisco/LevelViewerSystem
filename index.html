@@ -88,9 +88,10 @@
     }
 
     function startVerticalMove(direction) {
-      moveVertical(direction * MOVE_STEP);
       if (moveInterval) return;
-      moveInterval = setInterval(() => moveVertical(direction * MOVE_STEP), 20);
+      const step = () => moveVertical(direction * MOVE_STEP);
+      step();
+      moveInterval = setInterval(step, 20);
     }
 
     function stopVerticalMove() {
@@ -101,13 +102,13 @@
     }
 
     function startRotate(direction) {
-      rotation += direction * ROTATE_STEP;
-      updateView();
       if (rotateInterval) return;
-      rotateInterval = setInterval(() => {
+      const step = () => {
         rotation += direction * ROTATE_STEP;
         updateView();
-      }, 20);
+      };
+      step();
+      rotateInterval = setInterval(step, 20);
     }
 
     function stopRotate() {
