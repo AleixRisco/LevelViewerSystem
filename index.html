@@ -21,14 +21,14 @@
     <div id="viewer">
       <div id="controls">
         <div class="control-group">
-          <button class="btn-up" onclick="goUp()">↑</button>
+          <button class="btn-up">↑</button>
           <button onclick="rotateLeft()">⟵</button>
-          <button class="btn-down" onclick="goDown()">↓</button>
+          <button class="btn-down">↓</button>
         </div>
         <div class="control-group">
-          <button class="btn-up" onclick="goUp()">↑</button>
+          <button class="btn-up">↑</button>
           <button onclick="rotateRight()">⟶</button>
-          <button class="btn-down" onclick="goDown()">↓</button>
+          <button class="btn-down">↓</button>
         </div>
       </div>
       <div id="imageContainer">
@@ -44,23 +44,27 @@
     const imageWidth = 2000; // width of level images in pixels
     let rotation = 0;
     let currentLevel = 0;
+    let verticalOffset = 0;
+    let moveInterval = null;
+    const MOVE_STEP = 1; // percentage per step
     let levels = [];
 
     function updateView() {
-      const levelDiv = levelStack.children[currentLevel];
-      if (!levelDiv) return;
       const offset = (rotation / 360) * imageWidth;
-      levelDiv.style.backgroundPosition = `${-offset}px 0`;
+      Array.from(levelStack.children).forEach(levelDiv => {
+        levelDiv.style.backgroundPosition = `${-offset}px 0`;
+      });
     }
 
-    function updateLevelPosition(duration = 0.5) {
+    function updateLevelPosition(duration = 0) {
       levelStack.style.transitionDuration = `${duration}s`;
-      levelStack.style.transform = `translateY(-${currentLevel * 100}%)`;
+      levelStack.style.transform = `translateY(-${verticalOffset}%)`;
     }
 
     function updateButtons() {
-      document.querySelectorAll('.btn-up').forEach(btn => btn.disabled = currentLevel <= 0);
-      document.querySelectorAll('.btn-down').forEach(btn => btn.disabled = currentLevel >= levels.length - 1);
+      const maxOffset = (levels.length - 1) * 100;
+      document.querySelectorAll('.btn-up').forEach(btn => btn.disabled = verticalOffset <= 0);
+      document.querySelectorAll('.btn-down').forEach(btn => btn.disabled = verticalOffset >= maxOffset);
     }
 
     function setActiveLevel() {
@@ -69,45 +73,39 @@
         levelList.children[currentLevel].classList.add('active');
       }
     }
-
-    function goUp() {
-      if (currentLevel > 0) {
-        const prev = currentLevel;
-        currentLevel--;
-        rotation = 0;
-        levelStack.children[prev].style.backgroundPosition = '0 0';
-        updateView();
-        updateLevelPosition();
-        updateButtons();
+    function moveVertical(delta) {
+      const maxOffset = (levels.length - 1) * 100;
+      verticalOffset = Math.min(Math.max(verticalOffset + delta, 0), maxOffset);
+      updateLevelPosition(0);
+      const newLevel = Math.round(verticalOffset / 100);
+      if (newLevel !== currentLevel) {
+        currentLevel = newLevel;
         setActiveLevel();
       }
+      updateButtons();
     }
 
-    function goDown() {
-      if (currentLevel < levels.length - 1) {
-        const prev = currentLevel;
-        currentLevel++;
-        rotation = 0;
-        levelStack.children[prev].style.backgroundPosition = '0 0';
-        updateView();
-        updateLevelPosition();
-        updateButtons();
-        setActiveLevel();
+    function startVerticalMove(direction) {
+      moveVertical(direction * MOVE_STEP);
+      if (moveInterval) return;
+      moveInterval = setInterval(() => moveVertical(direction * MOVE_STEP), 20);
+    }
+
+    function stopVerticalMove() {
+      if (moveInterval) {
+        clearInterval(moveInterval);
+        moveInterval = null;
       }
     }
 
     function goToLevel(index) {
-      if (index < 0 || index >= levels.length || index === currentLevel) return;
-      const prev = currentLevel;
+      if (index < 0 || index >= levels.length) return;
+      verticalOffset = index * 100;
       currentLevel = index;
-      rotation = 0;
-      if (levelStack.children[prev]) {
-        levelStack.children[prev].style.backgroundPosition = '0 0';
-      }
-      updateView();
       updateLevelPosition(1);
       updateButtons();
       setActiveLevel();
+      updateView();
     }
 
     fetch("data/levels.json?v=" + version)
@@ -128,9 +126,11 @@
         });
         if (levels.length > 0) {
           currentLevel = levels.length - 1;
+          verticalOffset = currentLevel * 100;
           updateLevelPosition(0);
           setActiveLevel();
           updateButtons();
+          updateView();
         }
       });
 
@@ -148,10 +148,28 @@
       } else if (e.key === 'ArrowRight') {
         rotateRight();
       } else if (e.key === 'ArrowUp') {
-        goUp();
+        if (!moveInterval) startVerticalMove(-1);
       } else if (e.key === 'ArrowDown') {
-        goDown();
+        if (!moveInterval) startVerticalMove(1);
       }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        stopVerticalMove();
+      }
+    });
+
+    document.querySelectorAll('.btn-up').forEach(btn => {
+      btn.addEventListener('mousedown', () => startVerticalMove(-1));
+      btn.addEventListener('mouseup', stopVerticalMove);
+      btn.addEventListener('mouseleave', stopVerticalMove);
+    });
+
+    document.querySelectorAll('.btn-down').forEach(btn => {
+      btn.addEventListener('mousedown', () => startVerticalMove(1));
+      btn.addEventListener('mouseup', stopVerticalMove);
+      btn.addEventListener('mouseleave', stopVerticalMove);
     });
   </script>
 </body>
