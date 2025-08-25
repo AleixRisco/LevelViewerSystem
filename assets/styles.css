@@ -24,11 +24,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e0e0e0;
+  background: url('game_ui.png') no-repeat center center;
+  background-size: contain;
   position: relative;
 }
 #imageContainer {
-  width: 800px;
+  width: 400px;
   height: 600px;
   overflow: hidden;
   position: relative;
@@ -67,8 +68,9 @@ button {
 #controls {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  width: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
   display: flex;
   justify-content: space-between;
   padding: 0 20px;
