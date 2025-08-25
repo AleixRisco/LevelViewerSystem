@@ -11,7 +11,7 @@
     <div id="sidebar">
       <div>
         <h2>Niveles</h2>
-        <ul id="levelList"></ul>
+        <div id="worldList"></div>
       </div>
       <div class="version-box">
         Versión: 1.0.0<br>
@@ -39,16 +39,18 @@
   <script>
     const version = "1.0.0";
     const buildTime = "2025-08-21 12:26 CEST";
-    const levelList = document.getElementById("levelList");
+    const worldList = document.getElementById("worldList");
     const levelStack = document.getElementById("levelStack");
     const imageWidth = 2000; // width of level images in pixels
     let rotation = 0;
+    let currentWorld = 0;
     let currentLevel = 0;
     let verticalOffset = 0;
     let moveInterval = null;
     const MOVE_STEP = 2; // percentage per step
     let rotateInterval = null;
     const ROTATE_STEP = 5; // degrees per step
+    let worlds = [];
     let levels = [];
 
     function updateView() {
@@ -70,11 +72,14 @@
     }
 
     function setActiveLevel() {
-      [...levelList.children].forEach(li => li.classList.remove('active'));
-      if (levelList.children[currentLevel]) {
-        levelList.children[currentLevel].classList.add('active');
+      worldList.querySelectorAll('li').forEach(li => li.classList.remove('active'));
+      const worldDetails = worldList.children[currentWorld];
+      if (worldDetails) {
+        const items = worldDetails.querySelectorAll('li');
+        if (items[currentLevel]) items[currentLevel].classList.add('active');
       }
     }
+
     function moveVertical(delta) {
       const maxOffset = (levels.length - 1) * 100;
       verticalOffset = Math.min(Math.max(verticalOffset + delta, 0), maxOffset);
@@ -128,29 +133,65 @@
       updateView();
     }
 
-    fetch("data/levels.json?v=" + version)
+    function loadWorld(worldIndex, levelIndex = 0) {
+      currentWorld = worldIndex;
+      levels = worlds[worldIndex].levels;
+      levelStack.innerHTML = '';
+      levels.forEach(level => {
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'level';
+        levelDiv.style.backgroundImage = `url(${level.image}?v=${version})`;
+        levelStack.prepend(levelDiv);
+      });
+      const domIndex = levels.length - 1 - levelIndex;
+      currentLevel = domIndex;
+      verticalOffset = currentLevel * 100;
+      updateLevelPosition(0);
+      updateButtons();
+      setActiveLevel();
+      updateView();
+    }
+
+    fetch("data/worlds.json?v=" + version)
       .then(res => res.json())
       .then(data => {
-        levels = data.levels;
-        levels.forEach((level, index) => {
-          const levelDiv = document.createElement('div');
-          levelDiv.className = 'level';
-          levelDiv.style.backgroundImage = `url(${level.image}?v=${version})`;
-          levelStack.prepend(levelDiv);
+        worlds = data.worlds;
+        worlds.forEach((world, worldIndex) => {
+          const details = document.createElement('details');
+          if (worldIndex === 0) details.open = true;
+          const summary = document.createElement('summary');
+          summary.textContent = world.name;
+          details.appendChild(summary);
 
-          const item = document.createElement('li');
-          item.textContent = level.name;
-          const domIndex = levels.length - 1 - index;
-          item.addEventListener('click', () => goToLevel(domIndex));
-          levelList.prepend(item);
+          const ul = document.createElement('ul');
+          ul.className = 'level-list';
+
+          world.levels.forEach((level, idx) => {
+            const li = document.createElement('li');
+            li.textContent = level.name;
+            const domIndex = world.levels.length - 1 - idx;
+            li.addEventListener('click', () => {
+              if (currentWorld === worldIndex) {
+                goToLevel(domIndex);
+              } else {
+                loadWorld(worldIndex, idx);
+              }
+            });
+            ul.prepend(li);
+          });
+
+          details.appendChild(ul);
+          worldList.appendChild(details);
+
+          details.addEventListener('toggle', () => {
+            if (details.open && currentWorld !== worldIndex) {
+              loadWorld(worldIndex, 0);
+            }
+          });
         });
-        if (levels.length > 0) {
-          currentLevel = levels.length - 1;
-          verticalOffset = currentLevel * 100;
-          updateLevelPosition(0);
-          setActiveLevel();
-          updateButtons();
-          updateView();
+
+        if (worlds.length > 0) {
+          loadWorld(0, 0);
         }
       });
 

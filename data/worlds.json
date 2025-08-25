@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "buildTime": "2025-08-21 12:26 CEST",
+  "worlds": [
+    {
+      "name": "Mundo 1",
+      "levels": [
+        {"name": "level_01-01", "image": "assets/level_01-01.png"},
+        {"name": "level_01-02", "image": "assets/level_01-02.png"},
+        {"name": "level_01-03", "image": "assets/level_01-03.png"}
+      ]
+    },
+    {
+      "name": "Mundo 2",
+      "levels": [
+        {"name": "level_02-01", "image": "assets/level_02-01.png"},
+        {"name": "level_02-02", "image": "assets/level_02-02.png"}
+      ]
+    }
+  ]
+}
