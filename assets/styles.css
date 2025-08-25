@@ -24,10 +24,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('game_ui.png') no-repeat center center;
-  background-size: contain;
-  position: relative;
 }
+
+#ui {
+  width: 800px;
+  height: 600px;
+  background: url('game_ui.png') no-repeat center center;
+  background-size: 100% 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #imageContainer {
   width: 400px;
   height: 600px;
@@ -65,17 +74,7 @@ button {
   color: #666;
   margin-top: 10px;
 }
-#controls {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-#controls button {
+.control-group button {
   font-size: 20px;
 }
 
@@ -83,6 +82,7 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0 20px;
 }
 
 #levelList {
