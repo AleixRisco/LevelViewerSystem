@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LevelViewerSystem</title>
-  <link rel="stylesheet" href="assets/styles.css?v=1.0.0">
+  <link rel="stylesheet" href="assets/styles.css?v=1.1.0">
 </head>
 <body>
   <div id="container">
     <div id="sidebar">
       <div>
-        <h2>Niveles</h2>
+        <h2>Levels</h2>
         <div id="worldList"></div>
       </div>
       <div class="version-box">
-        Versión: 1.0.0<br>
-        Build: 2025-08-21 12:26 CEST
+        Version: 1.1.0<br>
+        Build: 2025-08-25 16:08 CEST
       </div>
     </div>
     <div id="viewer">
@@ -37,8 +37,8 @@
     </div>
   </div>
   <script>
-    const version = "1.0.0";
-    const buildTime = "2025-08-21 12:26 CEST";
+    const version = "1.1.0";
+    const buildTime = "2025-08-25 16:08 CEST";
     const worldList = document.getElementById("worldList");
     const levelStack = document.getElementById("levelStack");
     const imageWidth = 2000; // width of level images in pixels
@@ -168,7 +168,7 @@
 
           world.levels.forEach((level, idx) => {
             const li = document.createElement('li');
-            li.textContent = level.name;
+            li.textContent = level.displayName;
             const domIndex = world.levels.length - 1 - idx;
             li.addEventListener('click', () => {
               if (currentWorld === worldIndex) {
